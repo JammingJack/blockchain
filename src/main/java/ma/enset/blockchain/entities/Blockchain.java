@@ -3,18 +3,20 @@ package ma.enset.blockchain.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Entity
-@Data @AllArgsConstructor @NoArgsConstructor
+@Data @AllArgsConstructor @NoArgsConstructor @ToString
 public class Blockchain {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
     private String name;
     private int difficulty;
     private int miningReward;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Block> blocks;
+
 }
