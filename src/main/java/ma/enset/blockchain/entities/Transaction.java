@@ -20,4 +20,5 @@ public class Transaction {
     private Date date;
     private String addressSource;
     private String addressDestination;
+    private double amount;
 }

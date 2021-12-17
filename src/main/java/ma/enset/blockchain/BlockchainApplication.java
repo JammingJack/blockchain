@@ -29,8 +29,8 @@ public class BlockchainApplication {
                             BlockchainRepository blockchainRepository, BlockService blockService) {
         return args -> {
             System.out.println("started from the bottom");
-            transactionRepository.save(new Transaction("1", new Date(), "", ""));
-            transactionRepository.save(new Transaction("2", new Date(), "aa", "bb"));
+            transactionRepository.save(new Transaction("1", new Date(), "", "", 1000));
+            transactionRepository.save(new Transaction("2", new Date(), "aa", "bb", 2000));
             blockRepository.save(new Block("1", new Date(), "0", "0", transactionRepository.findAll(),0));
             blockchainRepository.save(new Blockchain());
            /* Block blk = blockRepository.getById("1");
@@ -39,7 +39,7 @@ public class BlockchainApplication {
             System.out.println(blk.getHash());
 
             //blockService.createBlock(blk.getTransactions(), "0");
-            Block finalBlock = blockService.mineBlock(blk,3);
+            Block finalBlock = blockService.mineBlock(blk,5);
             System.out.println(finalBlock.getHash());
             System.out.println(finalBlock.getNonce());
             System.out.println("Now we here");

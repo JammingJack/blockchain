@@ -20,9 +20,7 @@ public class BlockServiceImpl implements BlockService {
         block.setCreatedAt(new Date(System.currentTimeMillis()));
         block.setPreviousHash(previousHash);
         block.setNonce(0);
-
         block.setHash(getBlockHash(block));
-
         return block;
     }
 
