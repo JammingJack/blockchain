@@ -1,7 +1,10 @@
 package ma.enset.blockchain.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 import ma.enset.blockchain.entities.Block;
 import ma.enset.blockchain.entities.Blockchain;
 import ma.enset.blockchain.entities.Transaction;
@@ -15,8 +18,11 @@ import java.util.*;
 @Service
 public class BlockchainServiceImpl implements BlockchainService {
     private final static int BLOCK_SIZE = 3;
+    public static boolean BLOCK_ALREADY_GOT_MINED = false;
+    @Getter @Setter
+    private String instanceOwnerAdress ;
     private BlockService blockService;
-    private Block currentBlockToBeMined;
+    @Getter private Block currentBlockToBeMined;
     private Blockchain blockchain;
     private BlockchainRepository blockchainRepository;
     private ArrayList<Transaction> pendingTransactions;
@@ -32,34 +38,43 @@ public class BlockchainServiceImpl implements BlockchainService {
         this.pendingTransactions = new ArrayList<>();
     }
 
-    public int getDifficulty(){
-        return this.blockchain.getDifficulty();
+    public Blockchain getBlockchain(){
+        return this.blockchain;
     }
+
+
     @Override
     public Blockchain createBlockchain(String name, int difficulty, int miningReward) {
-        Blockchain blockchain = new Blockchain();
-
+        this.blockchain = new Blockchain();
         Block genesisBlock = blockService.createBlock(Collections.emptyList(), "0");
         blockchain.setId(UUID.randomUUID().toString());
         blockchain.setName(name);
         blockchain.setDifficulty(difficulty);
         blockchain.setMiningReward(miningReward);
         blockchain.setBlocks(new LinkedList<Block>());
-        System.out.println("inside createblockchaine " + genesisBlock.getId());
+        System.out.println("inside create blockchaine " + genesisBlock.getId());
         blockchain.getBlocks().add(genesisBlock);
-        this.blockchain = blockchain;
-        blockchainRepository.save(blockchain);
-        return blockchain;
+        return blockchainRepository.save(blockchain);
     }
 
     @Override
     public boolean addTransactionToPendingTransactions(Transaction transaction) {
         boolean added = pendingTransactions.add(transaction);
+
+        ObjectMapper objectMapper = new ObjectMapper();
         transactionRepository.save(transaction);
         if(pendingTransactions.size()==BLOCK_SIZE){
+            BLOCK_ALREADY_GOT_MINED = false;
             //we create a block and start to mine it
             Block block = blockService.createBlock(pendingTransactions.subList(0,BLOCK_SIZE),getLastBlock().getHash());
-            currentBlockToBeMined = block;
+            try {
+                currentBlockToBeMined = objectMapper
+                        .readValue(objectMapper.writeValueAsString(block), Block.class);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+
+            System.out.println("addTransactionToPendingTransactions " + currentBlockToBeMined.toString()    );
             //publish the block to the broker to be mined by all miners
             blockPublisher.publish(block);
             pendingTransactions.clear();
@@ -68,17 +83,23 @@ public class BlockchainServiceImpl implements BlockchainService {
     }
 
     @Override
-    public Block mineBlock(Block block, String minerAddress) {
-        block = blockService.mineBlock(block, blockchain.getDifficulty());
-        Transaction rewardTransaction = new Transaction(
-        UUID.randomUUID().toString(),
-        new Date(System.currentTimeMillis()),
-        minerAddress,
-        minerAddress,
-        blockchain.getMiningReward()
-        );
-        addTransactionToPendingTransactions(rewardTransaction);
-        return block;
+    public boolean mineBlock(Block block, String minerAddress) {
+        //block = blockService.mineBlock(block, blockchain.getDifficulty());
+        try{
+            Transaction rewardTransaction = new Transaction(
+                    UUID.randomUUID().toString(),
+                    new Date(System.currentTimeMillis()),
+                    minerAddress,
+                    minerAddress,
+                    blockchain.getMiningReward()
+            );
+            addTransactionToPendingTransactions(rewardTransaction);
+            return true;
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 
     @Override

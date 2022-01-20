@@ -20,6 +20,5 @@ public class TransactionPublisher {
         }catch (Exception e){
             return false;
         }
-
     }
 }

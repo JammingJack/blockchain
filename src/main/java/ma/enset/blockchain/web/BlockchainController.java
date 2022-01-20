@@ -45,8 +45,25 @@ public class BlockchainController {
 
         transactionPublisher.publish(transaction);
         return "transaction published seccussefuly";
+    }
 
+    @GetMapping(path="/balance/{address}")
+    public double getBalance(@PathVariable String address){
+        return blockchainService.getAddressBalance(address);
+    }
 
+    @GetMapping(path="/testBlockChainValidity")
+    public String isValid(){
+        return blockchainService.isBlockchainValid()?"Blockchain is Valid":"Blockchain is not Valid";
+    }
+
+    @GetMapping(path = "/setInstanceAddress/{address}")
+    public void setInstanceAddress(@PathVariable String address){
+        blockchainService.setInstanceOwnerAdress(address);
+    }
+    @GetMapping(path = "/getInstanceAddress")
+    public String getInstanceAddress(){
+        return blockchainService.getInstanceOwnerAdress();
     }
 
 }

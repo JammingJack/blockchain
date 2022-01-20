@@ -9,10 +9,12 @@ import java.util.List;
 public interface BlockchainService {
     public Blockchain createBlockchain(String name, int difficulty, int miningReward);
     public boolean addTransactionToPendingTransactions(Transaction transaction);
-    public int getDifficulty();
-    public Block mineBlock(Block block, String minerAddress);
+    public Blockchain getBlockchain();
+    public void setInstanceOwnerAdress(String adress);
+    public String getInstanceOwnerAdress();
+    public Block getCurrentBlockToBeMined();
+    public boolean mineBlock(Block block, String minerAddress);
     public Block getLastBlock();
     public boolean isBlockchainValid();
     public double getAddressBalance(String address);
-
 }

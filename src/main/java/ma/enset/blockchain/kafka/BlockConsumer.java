@@ -1,6 +1,7 @@
 package ma.enset.blockchain.kafka;
 
 import lombok.AllArgsConstructor;
+import ma.enset.blockchain.dtos.FinishedMiningMessageDto;
 import ma.enset.blockchain.entities.Block;
 import ma.enset.blockchain.entities.Transaction;
 import ma.enset.blockchain.services.BlockService;
@@ -12,14 +13,18 @@ import org.springframework.stereotype.Service;
 public class BlockConsumer {
     private BlockchainService blockchainService;
     private BlockService blockService;
+    private BlockPublisher blockPublisher;
+    private MiningMessagesPublisher miningMessagesPublisher;
 
-    public static boolean BLOCK_ALREADY_GOT_MINED = false;
     @KafkaListener(topics = "Blocks",groupId="block_json", containerFactory = "blockKafkaListenerFactory")
     public void consumeBlock(Block block) {
-        BLOCK_ALREADY_GOT_MINED = false;
         System.out.println("Consumed JSON Message: " + block);
-        block = blockService.mineBlock(block, blockchainService.getDifficulty());
+        block = blockService.mineBlock(block, blockchainService.getBlockchain().getDifficulty());
+        miningMessagesPublisher.publish(new FinishedMiningMessageDto(
+                true,
+                blockchainService.getInstanceOwnerAdress(),
+                block.getNonce()
+        ));
         System.out.println("block got mined : nonce : " +block.getNonce() + " hash : "+ block.getHash());
-        BLOCK_ALREADY_GOT_MINED = true;
     }
 }

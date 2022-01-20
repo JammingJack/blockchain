@@ -27,7 +27,8 @@ public class BlockServiceImpl implements BlockService {
         block.setCreatedAt(new Date(System.currentTimeMillis()));
         block.setPreviousHash(previousHash);
         block.setNonce(0);
-        //block.setHash(getBlockHash(block));
+        block.setTransactions(list);
+        block.setHash(getBlockHash(block));
         System.out.println("inside create block" + block.getId());
         blockRepository.save(block);
         return block;
@@ -52,13 +53,18 @@ public class BlockServiceImpl implements BlockService {
     public Block mineBlock(Block block, int difficulty) {
         String prefix = new String(new char[difficulty]).replace('\0','0');
         String hash = getBlockHash(block);
-        while(!hash.startsWith(prefix, 0) && !BlockConsumer.BLOCK_ALREADY_GOT_MINED){
-            System.out.println(hash);
+        while(!hash.startsWith(prefix, 0) && !BlockchainServiceImpl.BLOCK_ALREADY_GOT_MINED){
+            //System.out.println(hash);
             block.setNonce(block.getNonce()+1);
             hash = getBlockHash(block);
         }
         block.setHash(hash);
         return block;
+    }
+
+    @Override
+    public Block saveBlock(Block block) {
+        return blockRepository.save(block);
     }
 
     private static String bytesToHex(byte[] hash) {
