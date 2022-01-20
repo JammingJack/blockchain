@@ -11,7 +11,7 @@ import java.util.List;
 @Entity
 @Data @AllArgsConstructor @NoArgsConstructor @ToString
 public class Blockchain {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private String id;
     private String name;
     private int difficulty;

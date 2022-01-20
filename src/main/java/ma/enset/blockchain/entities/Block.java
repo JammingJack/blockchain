@@ -12,13 +12,13 @@ import java.util.List;
 @Entity
 @Data @AllArgsConstructor @NoArgsConstructor @ToString(exclude = {"hash"})
 public class Block {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private String id;
     private Date createdAt;
 
     private String hash;
     private String previousHash;
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private List<Transaction> transactions;
     private int nonce;
 

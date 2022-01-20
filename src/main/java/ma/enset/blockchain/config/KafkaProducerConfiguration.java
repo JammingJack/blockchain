@@ -1,4 +1,5 @@
 package ma.enset.blockchain.config;
+import ma.enset.blockchain.entities.Block;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import ma.enset.blockchain.entities.Transaction;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class KafkaConfiguration {
+public class KafkaProducerConfiguration {
     @Bean
     public ProducerFactory<String, Transaction> producerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -30,5 +31,23 @@ public class KafkaConfiguration {
     public KafkaTemplate<String, Transaction> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
+
+    @Bean
+    public ProducerFactory<String, Block> producerFactory_blocks() {
+        Map<String, Object> config = new HashMap<>();
+
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+
+    @Bean
+    public KafkaTemplate<String, Block> kafkaTemplate_blocks() {
+        return new KafkaTemplate<>(producerFactory_blocks());
+    }
+
 
 }

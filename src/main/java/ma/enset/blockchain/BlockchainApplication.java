@@ -8,6 +8,8 @@ import ma.enset.blockchain.repositories.BlockchainRepository;
 import ma.enset.blockchain.repositories.TransactionRepository;
 import ma.enset.blockchain.services.BlockService;
 import ma.enset.blockchain.services.BlockServiceImpl;
+import ma.enset.blockchain.services.BlockchainService;
+import ma.enset.blockchain.services.BlockchainServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -24,7 +26,7 @@ public class BlockchainApplication {
         SpringApplication.run(BlockchainApplication.class, args);
 
     }
-    @Bean
+/*    @Bean
     CommandLineRunner start(TransactionRepository transactionRepository,BlockRepository blockRepository,
                             BlockchainRepository blockchainRepository, BlockService blockService) {
         return args -> {
@@ -33,8 +35,8 @@ public class BlockchainApplication {
             transactionRepository.save(new Transaction("2", new Date(), "aa", "bb", 2000));
             blockRepository.save(new Block("1", new Date(), "0", "0", transactionRepository.findAll(),0));
             blockchainRepository.save(new Blockchain());
-           /* Block blk = blockRepository.getById("1");
-            blk.setHash("1");*/
+           *//* Block blk = blockRepository.getById("1");
+            blk.setHash("1");*//*
             Block blk = blockService.createBlock(transactionRepository.findAll(),"0");
             System.out.println(blk.getHash());
 
@@ -44,7 +46,15 @@ public class BlockchainApplication {
             System.out.println(finalBlock.getNonce());
             System.out.println("Now we here");
         };
-    }
+    }*/
 
+    @Bean
+    CommandLineRunner start(BlockchainService blockchainService) {
+        return args -> {
+            System.out.println("started from the bottom");
+            blockchainService.createBlockchain("glsid_blockchain", 4, 6);
+            System.out.println("Now we here");
+        };
+    }
 
 }

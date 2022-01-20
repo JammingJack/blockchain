@@ -2,6 +2,8 @@ package ma.enset.blockchain.services;
 
 import ma.enset.blockchain.entities.Block;
 import ma.enset.blockchain.entities.Transaction;
+import ma.enset.blockchain.kafka.BlockConsumer;
+import ma.enset.blockchain.repositories.BlockRepository;
 import org.springframework.stereotype.Service;
 import sun.plugin2.message.Message;
 
@@ -13,6 +15,11 @@ import java.util.List;
 import java.util.UUID;
 @Service
 public class BlockServiceImpl implements BlockService {
+    private BlockRepository blockRepository;
+    private BlockConsumer blockConsumer;
+    public BlockServiceImpl(BlockRepository blockRepository) {
+        this.blockRepository = blockRepository;
+    }
     @Override
     public Block createBlock(List<Transaction> list, String previousHash) {
         Block block = new Block();
@@ -20,7 +27,9 @@ public class BlockServiceImpl implements BlockService {
         block.setCreatedAt(new Date(System.currentTimeMillis()));
         block.setPreviousHash(previousHash);
         block.setNonce(0);
-        block.setHash(getBlockHash(block));
+        //block.setHash(getBlockHash(block));
+        System.out.println("inside create block" + block.getId());
+        blockRepository.save(block);
         return block;
     }
 
@@ -41,12 +50,9 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public Block mineBlock(Block block, int difficulty) {
-        char[] chars = new char[difficulty];
-            Arrays.fill(new char[difficulty], '0');
-
         String prefix = new String(new char[difficulty]).replace('\0','0');
         String hash = getBlockHash(block);
-        while(!hash.startsWith(prefix, 0)){
+        while(!hash.startsWith(prefix, 0) && !BlockConsumer.BLOCK_ALREADY_GOT_MINED){
             System.out.println(hash);
             block.setNonce(block.getNonce()+1);
             hash = getBlockHash(block);
